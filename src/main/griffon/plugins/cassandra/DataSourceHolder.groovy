@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 the original author or authors.
+ * Copyright 2011-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory
  * @author Andres Almiray
  */
 @Singleton
-class DataSourceHolder {
+class DataSourceHolder implements CassandraProvider {
     private static final Logger LOG = LoggerFactory.getLogger(DataSourceHolder)
     private static final Object[] LOCK = new Object[0]
     private final Map<String, DataSource> dataSources = [:]
@@ -55,7 +55,7 @@ class DataSourceHolder {
 
     Object withCql(String dataSourceName = 'default', Closure closure) {
         DataSource ds = fetchDataSource(dataSourceName)
-        if(LOG.debugEnabled) LOG.debug("Executing SQL statement on datasource '$dataSourceName'")
+        if(LOG.debugEnabled) LOG.debug("Executing CQL statement on datasource '$dataSourceName'")
         Connection connection = ds.getConnection()
         try {
             return closure(dataSourceName, new Sql(connection))
@@ -66,7 +66,7 @@ class DataSourceHolder {
 
     Object withCql(String dataSourceName = 'default', CallableWithArgs callable) {
         DataSource ds = fetchDataSource(dataSourceName)
-        if(LOG.debugEnabled) LOG.debug("Executing SQL statement on datasource '$dataSourceName'")
+        if(LOG.debugEnabled) LOG.debug("Executing CQL statement on datasource '$dataSourceName'")
         Connection connection = ds.getConnection()
         try {
             return callable.call([dataSourceName, new Sql(connection)] as Object[])

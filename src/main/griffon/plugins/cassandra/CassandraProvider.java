@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 the original author or authors.
+ * Copyright 2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
+package griffon.plugins.cassandra;
+
+import groovy.lang.Closure;
+import griffon.util.CallableWithArgs;
+
 /**
  * @author Andres Almiray
  */
+public interface CassandraProvider {
+    Object withCql(Closure closure);
 
-// check to see if we already have a CassandraGriffonAddon
-configText = '''root.'CassandraGriffonAddon'.addon=true'''
-if(builderConfigFile.text.contains(configText)) {
-    println 'Removing CassandraGriffonAddon from Builder.groovy'
-    builderConfigFile.text -= configText
+    Object withCql(String dataSourceName, Closure closure);
+
+    <T> T withCql(CallableWithArgs<T> callable);
+
+    <T> T withCql(String dataSourceName, CallableWithArgs<T> callable);
 }

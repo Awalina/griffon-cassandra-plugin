@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 the original author or authors.
+ * Copyright 2011-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package griffon.plugins.cassandra
 
 import groovy.sql.Sql
@@ -38,25 +39,10 @@ import org.slf4j.LoggerFactory
  * @author Andres Almiray
  */
 @Singleton
-class CassandraConnector {
+class CassandraConnector implements CassandraProvider {
     private static final Logger LOG = LoggerFactory.getLogger(CassandraConnector)
     
     private bootstrap
-
-    static void enhance(MetaClass mc) {
-        mc.withCql = {Closure closure ->
-            DataSourceHolder.instance.withCql('default', closure)
-        }
-        mc.withCql << {String datasourceName, Closure closure ->
-            DataSourceHolder.instance.withCql(datasourceName, closure)
-        }
-        mc.withCql << {CallableWithArgs callable ->
-            DataSourceHolder.instance.withCql('default', callable)
-        }
-        mc.withCql << {String datasourceName, CallableWithArgs callable ->
-            DataSourceHolder.instance.withCql(datasourceName, callable)
-        }
-    }
 
     Object withCql(String dataSourceName = 'default', Closure closure) {
         DataSourceHolder.instance.withCql(datasourceName, closure)
