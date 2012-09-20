@@ -31,6 +31,7 @@ import org.apache.commons.dbcp.DriverManagerConnectionFactory
 import griffon.core.GriffonApplication
 import griffon.util.Environment
 import griffon.util.CallableWithArgs
+import griffon.util.ConfigUtils
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -55,8 +56,7 @@ class CassandraConnector implements CassandraProvider {
     // ======================================================
 
     ConfigObject createConfig(GriffonApplication app) {
-        def dataSourceClass = app.class.classLoader.loadClass('CassandraConfig')
-        new ConfigSlurper(Environment.current.name).parse(dataSourceClass)
+        ConfigUtils.loadConfigWithI18n('CassandraConfig')
     }
 
     private ConfigObject narrowConfig(ConfigObject config, String dataSourceName) {
@@ -123,7 +123,7 @@ class CassandraConnector implements CassandraProvider {
         }
         if(!ddl) {
             LOG.error("DataSource[${dataSourceName}].dbCreate was set to 'create' but no suitable schema was found in classpath.")
-        }        
+        }
 
         DataSourceHolder.instance.withCql(dataSourceName) { dsName, sql ->
             ddl.text.split(';').each { stmnt ->

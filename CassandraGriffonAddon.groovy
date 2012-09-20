@@ -37,7 +37,7 @@ class CassandraGriffonAddon {
         }
     }
 
-    def events = [
+    Map events = [
         ShutdownStart: { app ->
             ConfigObject config = CassandraConnector.instance.createConfig(app)
             CassandraConnector.instance.disconnect(app, config)

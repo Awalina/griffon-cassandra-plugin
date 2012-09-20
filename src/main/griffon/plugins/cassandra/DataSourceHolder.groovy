@@ -37,7 +37,7 @@ class DataSourceHolder implements CassandraProvider {
     private static final Logger LOG = LoggerFactory.getLogger(DataSourceHolder)
     private static final Object[] LOCK = new Object[0]
     private final Map<String, DataSource> dataSources = [:]
-  
+
     String[] getDataSourceNames() {
         List<String> dataSourceNames = new ArrayList().addAll(dataSources.keySet())
         dataSourceNames.toArray(new String[dataSourceNames.size()])
@@ -50,7 +50,7 @@ class DataSourceHolder implements CassandraProvider {
 
     void setDataSource(String dataSourceName = 'default', DataSource ds) {
         if(isBlank(dataSourceName)) dataSourceName = 'default'
-        storeDataSource(dataSourceName, ds)       
+        storeDataSource(dataSourceName, ds)
     }
 
     Object withCql(String dataSourceName = 'default', Closure closure) {
@@ -74,12 +74,12 @@ class DataSourceHolder implements CassandraProvider {
             connection.close()
         }
     }
-    
+
     boolean isDataSourceConnected(String dataSourceName) {
         if(isBlank(dataSourceName)) dataSourceName = 'default'
         retrieveDataSource(dataSourceName) != null
     }
-    
+
     void disconnectDataSource(String dataSourceName) {
         if(isBlank(dataSourceName)) dataSourceName = 'default'
         storeDataSource(dataSourceName, null)        
@@ -93,7 +93,7 @@ class DataSourceHolder implements CassandraProvider {
             ConfigObject config = CassandraConnector.instance.createConfig(app)
             ds = CassandraConnector.instance.connect(app, config, dataSourceName)
         }
-        
+
         if(ds == null) {
             throw new IllegalArgumentException("No such DataSource configuration for name $dataSourceName")
         }

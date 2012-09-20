@@ -8,13 +8,13 @@ griffon.project.dependency.resolution = {
         flatDir name: "cassandraLibDir", dirs: ["${basePath}lib"]
     }
     dependencies {
-        compile('org.apache.cassandra:cassandra-jdbc:1.0.5-SNAPSHOT',
-                'org.apache.cassandra:cassandra-thrift:1.0.2',
-                'org.apache.cassandra:cassandra-clientutil:1.0.2') {
+        compile('org.apache.cassandra:cassandra-jdbc:1.1.1',
+                'org.apache.cassandra:cassandra-thrift:1.1.3',
+                'org.apache.cassandra:cassandra-clientutil:1.1.3') {
             exclude 'junit'            
         }
         compile('commons-dbcp:commons-dbcp:1.4',
-                'commons-pool:commons-pool:1.5.6') {
+                'commons-pool:commons-pool:1.6') {
             transitive = false
         }
     }

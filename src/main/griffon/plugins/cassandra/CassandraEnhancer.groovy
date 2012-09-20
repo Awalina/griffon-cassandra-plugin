@@ -27,7 +27,7 @@ final class CassandraEnhancer {
     private static final Logger LOG = LoggerFactory.getLogger(CassandraEnhancer)
 
     private CassandraEnhancer() {}
-    
+
     static void enhance(MetaClass mc, CassandraProvider provider = DataSourceHolder.instance) {
         if(LOG.debugEnabled) LOG.debug("Enhancing $mc with $provider")
         mc.withCql = {Closure closure ->
