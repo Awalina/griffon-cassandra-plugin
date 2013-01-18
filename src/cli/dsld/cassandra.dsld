@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-package griffon.plugins.cassandra;
-
-import griffon.util.CallableWithArgs;
-import groovy.lang.Closure;
+package dsld
 
 /**
  * @author Andres Almiray
  */
-public interface CassandraProvider {
-    <R> R withCql(Closure<R> closure);
 
-    <R> R withCql(String dataSourceName, Closure<R> closure);
-
-    <R> R withCql(CallableWithArgs<R> callable);
-
-    <R> R withCql(String dataSourceName, CallableWithArgs<R> callable);
+contribute(enclosingClass(annotatedBy('griffon.plugins.cassandra.CassandraAware'))) {
+    provider = "Cassandra DSL"
+    delegatesTo "griffon.plugins.cassandra.CassandraContributionHandler"
 }

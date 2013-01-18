@@ -16,18 +16,24 @@
 
 package griffon.plugins.cassandra;
 
-import griffon.util.CallableWithArgs;
-import groovy.lang.Closure;
+import javax.sql.DataSource;
 
 /**
  * @author Andres Almiray
  */
-public interface CassandraProvider {
-    <R> R withCql(Closure<R> closure);
+public class DefaultCassandraProvider extends AbstractCassandraProvider {
+    private static final DefaultCassandraProvider INSTANCE;
 
-    <R> R withCql(String dataSourceName, Closure<R> closure);
+    static {
+        INSTANCE = new DefaultCassandraProvider();
+    }
 
-    <R> R withCql(CallableWithArgs<R> callable);
+    public static DefaultCassandraProvider getInstance() {
+        return INSTANCE;
+    }
 
-    <R> R withCql(String dataSourceName, CallableWithArgs<R> callable);
+    @Override
+    protected DataSource getDataSource(String dataSourceName) {
+        return DataSourceHolder.getInstance().fetchDataSource(dataSourceName);
+    }
 }

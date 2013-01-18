@@ -22,7 +22,11 @@ import groovy.lang.Closure;
 /**
  * @author Andres Almiray
  */
-public interface CassandraProvider {
+public interface CassandraContributionHandler {
+    void setCassandraProvider(CassandraProvider provider);
+
+    CassandraProvider getCassandraProvider();
+
     <R> R withCql(Closure<R> closure);
 
     <R> R withCql(String dataSourceName, Closure<R> closure);

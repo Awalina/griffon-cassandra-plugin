@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 the original author or authors.
+ * Copyright 2011-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,30 +40,24 @@ import org.slf4j.LoggerFactory
  * @author Andres Almiray
  */
 @Singleton
-class CassandraConnector implements CassandraProvider {
+class CassandraConnector {
+    private static final String DEFAULT = 'default'
     private static final Logger LOG = LoggerFactory.getLogger(CassandraConnector)
     
     private bootstrap
 
-    Object withCql(String dataSourceName = 'default', Closure closure) {
-        DataSourceHolder.instance.withCql(datasourceName, closure)
-    }
-
-    Object withCql(String dataSourceName = 'default', CallableWithArgs callable) {
-        DataSourceHolder.instance.withCql(datasourceName, callable)
-    }
-
-    // ======================================================
-
     ConfigObject createConfig(GriffonApplication app) {
-        ConfigUtils.loadConfigWithI18n('CassandraConfig')
+        if (!app.config.pluginConfig.cassandra) {
+            app.config.pluginConfig.cassandra = ConfigUtils.loadConfigWithI18n('CassandraConfig')
+        }
+        app.config.pluginConfig.cassandra
     }
 
     private ConfigObject narrowConfig(ConfigObject config, String dataSourceName) {
-        return dataSourceName == 'default' ? config.dataSource : config.dataSources[dataSourceName]
+        return dataSourceName == DEFAULT ? config.dataSource : config.dataSources[dataSourceName]
     }
 
-    DataSource connect(GriffonApplication app, ConfigObject config, String dataSourceName = 'default') {
+    DataSource connect(GriffonApplication app, ConfigObject config, String dataSourceName = DEFAULT) {
         if (DataSourceHolder.instance.isDataSourceConnected(dataSourceName)) {
             return DataSourceHolder.instance.getDataSource(dataSourceName)
         }
@@ -73,23 +67,35 @@ class CassandraConnector implements CassandraProvider {
         DataSource ds = createDataSource(config, dataSourceName)
         DataSourceHolder.instance.setDataSource(dataSourceName, ds)
         def skipSchema = config.schema?.skip ?: false
-        if (!skipSchema) createSchema(config, dataSourceName)
+        if (!skipSchema) createSchema(app, config, dataSourceName)
         bootstrap = app.class.classLoader.loadClass('BootstrapCassandra').newInstance()
         bootstrap.metaClass.app = app
-        DataSourceHolder.instance.withCql(dataSourceName) { dsName, sql -> bootstrap.init(dsName, sql) }
+        resolveCassandraProvider(app).withCql(dataSourceName) { dsName, sql -> bootstrap.init(dsName, sql) }
         app.event('CassandraConnectEnd', [dataSourceName, ds])
         ds
     }
 
-    void disconnect(GriffonApplication app, ConfigObject config, String dataSourceName = 'default') {
+    void disconnect(GriffonApplication app, ConfigObject config, String dataSourceName = DEFAULT) {
         if (DataSourceHolder.instance.isDataSourceConnected(dataSourceName)) {
             config = narrowConfig(config, dataSourceName)
             DataSource ds = DataSourceHolder.instance.getDataSource(dataSourceName)
             app.event('CassandraDisconnectStart', [config, dataSourceName, ds])
-            DataSourceHolder.instance.withCql(dataSourceName) { dsName, sql -> bootstrap.destroy(dsName, sql) }
+            resolveCassandraProvider(app).withCql(dataSourceName) { dsName, sql -> bootstrap.destroy(dsName, sql) }
             app.event('CassandraDisconnectEnd', [config, dataSourceName])
             DataSourceHolder.instance.disconnectDataSource(dataSourceName)
         }
+    }
+
+    CassandraProvider resolveCassandraProvider(GriffonApplication app) {
+        def cassandraProvider = app.config.cassandraProvider
+        if (cassandraProvider instanceof Class) {
+            cassandraProvider = cassandraProvider.newInstance()
+            app.config.cassandraProvider = cassandraProvider
+        } else if (!cassandraProvider) {
+            cassandraProvider = DefaultCassandraProvider.instance
+            app.config.cassandraProvider = cassandraProvider
+        }
+        cassandraProvider
     }
 
     private DataSource createDataSource(ConfigObject config, String dataSourceName) {
@@ -107,7 +113,7 @@ class CassandraConnector implements CassandraProvider {
         new PoolingDataSource(connectionPool)
     }
 
-    private void createSchema(ConfigObject config, String dataSourceName) {
+    private void createSchema(GriffonApplication app, ConfigObject config, String dataSourceName) {
         String dbCreate = config.dbCreate.toString()
         if (dbCreate != 'create') return
 
@@ -125,18 +131,18 @@ class CassandraConnector implements CassandraProvider {
             LOG.error("DataSource[${dataSourceName}].dbCreate was set to 'create' but no suitable schema was found in classpath.")
         }
 
-        DataSourceHolder.instance.withCql(dataSourceName) { dsName, sql ->
+        resolveCassandraProvider(app).withCql(dataSourceName) { dsName, sql ->
             ddl.text.split(';').each { stmnt ->
                 if (stmnt?.trim()) sql.execute(stmnt.trim() + ';')
             }
         }
     }
-    
+
     private String getEnvironmentShortName() {
         switch(Environment.current) {
             case Environment.DEVELOPMENT: return 'dev'
-            case Environment.TEST: return 'test'
-            case Environment.PRODUCTION: return 'prod'
+            case Environment.TEST:        return 'test'
+            case Environment.PRODUCTION:  return 'prod'
             default: return Environment.current.name
         }
     }
