@@ -20,13 +20,17 @@ import griffon.plugins.cassandra.CassandraConnector
 import griffon.plugins.cassandra.CassandraEnhancer
 import griffon.plugins.cassandra.CassandraContributionHandler
 
+import static griffon.util.ConfigUtils.getConfigValueAsBoolean
+
 /**
  * @author Andres Almiray
  */
 class CassandraGriffonAddon {
     void addonPostInit(GriffonApplication app) {
         ConfigObject config = CassandraConnector.instance.createConfig(app)
-        CassandraConnector.instance.connect(app, config)
+        if (getConfigValueAsBoolean(app.config, 'griffon.cassandra.connect.onstartup', true)) {
+            CassandraConnector.instance.connect(app, config)
+        }
         def types = app.config.griffon?.cassandra?.injectInto ?: ['controller']
         for(String type : types) {
             for(GriffonClass gc : app.artifactManager.getClassesOfType(type)) {

@@ -30,7 +30,7 @@ final class CassandraEnhancer {
     private CassandraEnhancer() {}
     
     static void enhance(MetaClass mc, CassandraProvider provider = DefaultCassandraProvider.instance) {
-        if(LOG.debugEnabled) LOG.debug("Enhancing $mc with $provider")
+        if (LOG.debugEnabled) LOG.debug("Enhancing $mc with $provider")
         mc.withCql = {Closure closure ->
             provider.withCql(DEFAULT, closure)
         }

@@ -19,7 +19,7 @@
  */
 class CassandraGriffonPlugin {
     // the plugin version
-    String version = '1.0.0'
+    String version = '1.1.0'
     // the version or versions of Griffon the plugin is designed for
     String griffonVersion = '1.2.0 > *'
     // the other plugins this plugin depends on
@@ -62,7 +62,7 @@ Upon installation the plugin will generate the following artifacts in `$appdir/g
 
 A new dynamic method named `withCql` will be injected into all controllers,
 giving you access to a `groovy.sql.Sql` object, with which you'll be able to make
-calls to the repository. Remember to make all repository calls off the UI thread
+calls to the database. Remember to make all database calls off the UI thread
 otherwise your application may appear unresponsive when doing long computations
 inside the UI thread.
 
@@ -140,6 +140,22 @@ can be done in this way
 
 This block can be used inside the `environments()` block in the same way as the
 default database block is used.
+
+### Configuration Storage
+
+The plugin will load and store the contents of `CassandraConfig.groovy` inside the
+application's configuration, under the `pluginConfig` namespace. You may retrieve
+and/or update values using
+
+    app.config.pluginConfig.cassandra
+
+### Connect at Startup
+
+The plugin will attempt a connection to the default database at startup. If this
+behavior is not desired then specify the following configuration flag in
+`Config.groovy`
+
+    griffon.cassandra.connect.onstartup = false
 
 ### Example
 

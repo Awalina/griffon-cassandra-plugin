@@ -23,7 +23,7 @@ includeTargets << griffonScript("_GriffonCreateArtifacts")
 argsMap = argsMap ?: [:]
 argsMap.skipPackagePrompt = true
 
-if(!new File("${basedir}/griffon-app/conf/CassandraConfig.groovy").exists()) {
+if (!new File("${basedir}/griffon-app/conf/CassandraConfig.groovy").exists()) {
    createArtifact(
       name: "CassandraConfig",
       suffix: "",
@@ -31,7 +31,7 @@ if(!new File("${basedir}/griffon-app/conf/CassandraConfig.groovy").exists()) {
       path: "griffon-app/conf")
 }
 
-if(!new File("${basedir}/griffon-app/conf/BootstrapCassandra.groovy").exists()) {
+if (!new File("${basedir}/griffon-app/conf/BootstrapCassandra.groovy").exists()) {
    createArtifact(
       name: "BootstrapCassandra",
       suffix: "",
