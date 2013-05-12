@@ -32,6 +32,8 @@ public class DefaultCassandraProvider extends AbstractCassandraProvider {
         return INSTANCE;
     }
 
+    private DefaultCassandraProvider() {}
+
     @Override
     protected DataSource getDataSource(String dataSourceName) {
         return DataSourceHolder.getInstance().fetchDataSource(dataSourceName);

@@ -27,10 +27,7 @@ import static griffon.util.ConfigUtils.getConfigValueAsBoolean
  */
 class CassandraGriffonAddon {
     void addonPostInit(GriffonApplication app) {
-        ConfigObject config = CassandraConnector.instance.createConfig(app)
-        if (getConfigValueAsBoolean(app.config, 'griffon.cassandra.connect.onstartup', true)) {
-            CassandraConnector.instance.connect(app, config)
-        }
+        CassandraConnector.instance.createConfig(app)
         def types = app.config.griffon?.cassandra?.injectInto ?: ['controller']
         for(String type : types) {
             for(GriffonClass gc : app.artifactManager.getClassesOfType(type)) {
@@ -41,6 +38,12 @@ class CassandraGriffonAddon {
     }
 
     Map events = [
+        LoadAddonsEnd: { app, addons ->
+            if (getConfigValueAsBoolean(app.config, 'griffon.cassandra.connect.onstartup', true)) {
+                ConfigObject config = CassandraConnector.instance.createConfig(app)
+                CassandraConnector.instance.connect(app, config)
+            }
+        },
         ShutdownStart: { app ->
             ConfigObject config = CassandraConnector.instance.createConfig(app)
             CassandraConnector.instance.disconnect(app, config)
